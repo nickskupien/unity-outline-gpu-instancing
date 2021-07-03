@@ -1,2 +1,2 @@
-# Depth-and-Normals
+# Depth and Normals
  testing outlines using depth and normals
