@@ -1,9 +1,14 @@
 Shader "Postprocessing/depthShader"{
     //show values to edit in inspector
+    
     Properties{
         _MainTex ("Texture", 2D) = "white" {}
         _Offset ("Pixel Offset", Range (0,20)) = 0.001
         _Power ("Sobel Power", Range(0,20)) = 1
+        _Threshold ("First Clamp", Range(0,2)) = 0.1
+        _Threshold2 ("Slope of Tanh", Range(0,4)) = 1
+        _Threshold3 ("Clamp of Tanh", Range(0,8)) = 2
+        _Threshold4 ("Last Clamp", Range(0,1)) = 0.2
     }
 
     SubShader{
@@ -18,6 +23,7 @@ Shader "Postprocessing/depthShader"{
             CGPROGRAM
             //include useful shader functions
             #include "UnityCG.cginc"
+            #define PI 3.14159265358979323846
 
             //define vertex and fragment shader
             #pragma vertex vert
@@ -36,6 +42,11 @@ Shader "Postprocessing/depthShader"{
             float _PixelDensity;
 
             float _Power;
+
+            float _Threshold;
+            float _Threshold2;
+            float _Threshold3;
+            float _Threshold4;
 
             //matrix to convert from view space to world space
             float4x4 _viewToWorld;
@@ -94,12 +105,12 @@ Shader "Postprocessing/depthShader"{
                 pixel neighbor;
                 neighbor.normal = baseNormal;
 
-                baseNormal = baseNormal * 0.5 + 0.5;
+                // baseNormal = baseNormal * 0.5 + 0.5;
 
 
                 // float neighborDepth = baseDepth - (baseNormal.x*positionOffset.x + baseNormal.y*positionOffset.y)*_Offset;
 
-                float neighborDepth = baseDepth + baseNormal.x*positionOffset.x + baseNormal.y*positionOffset.x;
+                float neighborDepth = baseDepth + baseNormal.x*positionOffset.x*_Offset + baseNormal.y*positionOffset.y*_Offset;
                 
                 
                 neighbor.depth = neighborDepth;
@@ -128,6 +139,19 @@ Shader "Postprocessing/depthShader"{
                 return float2(clamp(up - centre, 0, 1) + clamp(down - centre, 0, 1) + clamp(left - centre, 0, 1) + clamp(right - centre, 0, 1), depth);
             }
 
+            float OuterEdgeDetect (float depthDifference){
+                float result = depthDifference;
+                result = clamp(result-_Threshold, 0, 1-_Threshold)*(1/(1-_Threshold));
+                result = 0.5 * (tanh(2*PI*result*_Threshold2 - _Threshold3) + 1);
+                // result = pow()
+                
+                return result;
+            }
+
+            float innerEdgeDetect (float normalDifference){
+                float result = normalDifference;
+            }
+
             //the fragment shader
             fixed4 frag(v2f i) : SV_TARGET{
                 //read depthnormal
@@ -153,13 +177,25 @@ Shader "Postprocessing/depthShader"{
                 pixel predictedLeft = PredictNeighbor(depth, normal, i.position, float2(-1, 0));
                 pixel predictedRight = PredictNeighbor(depth, normal, i.position, float2(1, 0));
 
-                float depthDifference = 
-                            predictedUp.depth - up.depth + 
-                            predictedDown.depth - down.depth + 
-                            predictedLeft.depth - left.depth + 
-                            predictedRight.depth - right.depth;
+                // float depthDifference = 
+                //             up.depth - predictedUp.depth + 
+                //             down.depth - predictedDown.depth + 
+                //             left.depth - predictedLeft.depth + 
+                //             right.depth - predictedRight.depth;
                             
+                float OuterEdge = 
+                            OuterEdgeDetect(up.depth - predictedUp.depth)
+                            + OuterEdgeDetect(down.depth - predictedDown.depth)
+                            + OuterEdgeDetect(left.depth - predictedLeft.depth)
+                            + OuterEdgeDetect(right.depth - predictedRight.depth);
 
+                float normalDifference = 
+                            OuterEdgeDetect(up.normal - predictedUp.normal)
+                            + OuterEdgeDetect(down.normal - predictedDown.normal)
+                            + OuterEdgeDetect(left.normal - predictedLeft.normal)
+                            + OuterEdgeDetect(right.normal - predictedRight.normal);
+                            
+                // depthDifference = edgeDetect(up.depth - predictedUp.depth)+ edgeDetect(left.depth - predictedLeft.depth);
                 // float depthDifference = 
                 //             predictedUp.depth - up.depth + predictedLeft.depth - left.depth;
 
@@ -179,7 +215,7 @@ Shader "Postprocessing/depthShader"{
                 // depthDifference = pow(depthDifference,1);
                 // diff = step(0.9, diff);
 
-                // depthDifference = clamp(depthDifference-0.2,0,1);
+                OuterEdge = clamp(OuterEdge-_Threshold4,0,1-_Threshold4)*(1/(1-_Threshold4));
 
 
                 // depthDifference = step(0.25, depthDifference);
@@ -201,7 +237,7 @@ Shader "Postprocessing/depthShader"{
                 // scaledNormal = sqrt(scaledNormal*scaledNormal);
 
 
-                // col = lerp(col, float4(1,0,1,1), depthDifference);
+                col = lerp(col, float4(1,0,1,1), OuterEdge);
 
                 // col = pow(col, 2);
 
@@ -213,18 +249,19 @@ Shader "Postprocessing/depthShader"{
 
                 // return float4(0,i.position.y*0.005,0,1);
                 // return float4(abs(predictedUp.depth)*0.25*0.03,0,0,1);
-                // return float4(scaledNormal,0,0,1);
-                // return col;
-
-                float2 sobelData = sobel(i.uv);
-                float s = pow(abs(1 - saturate(sobelData.x)), _Power);
-                s = floor(s+0.2);
-                s = lerp(1.0, s, ceil(sobelData.y - depth));
-                // float sobelDepth = lerp(sobelData.y, SampleDepth(input.uv), s);
-                col.rgb *= s;
-                col.a += 1 - s;
-
+                // return float4(normal.z*0.5+0.5,0,0,1);
                 return col;
+
+                // //----- SOBEL FILTER -------
+                // float2 sobelData = sobel(i.uv);
+                // float s = pow(abs(1 - saturate(sobelData.x)), _Power);
+                // s = floor(s+0.2);
+                // s = lerp(1.0, s, ceil(sobelData.y - depth));
+                // // float sobelDepth = lerp(sobelData.y, SampleDepth(input.uv), s);
+                // col.rgb *= s;
+                // col.a += 1 - s;
+                // return col;
+                // //---------------------------
 
             }
 
