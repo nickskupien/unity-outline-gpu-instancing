@@ -2,7 +2,8 @@ Shader "Postprocessing/depthShader"{
     //show values to edit in inspector
     Properties{
         _MainTex ("Texture", 2D) = "white" {}
-        _Offset ("Pixel Offset", Range (0,1)) = 0.001
+        _Offset ("Pixel Offset", Range (0,20)) = 0.001
+        _Power ("Sobel Power", Range(0,20)) = 1
     }
 
     SubShader{
@@ -31,6 +32,10 @@ Shader "Postprocessing/depthShader"{
             float4 _CameraDepthNormalsTexture_TexelSize;
 
             float _Offset;
+
+            float _PixelDensity;
+
+            float _Power;
 
             //matrix to convert from view space to world space
             float4x4 _viewToWorld;
@@ -89,14 +94,38 @@ Shader "Postprocessing/depthShader"{
                 pixel neighbor;
                 neighbor.normal = baseNormal;
 
+                baseNormal = baseNormal * 0.5 + 0.5;
 
-                float neighborDepth = baseDepth - (baseNormal.x*positionOffset.x + baseNormal.y*positionOffset.y)*_Offset;
+
+                // float neighborDepth = baseDepth - (baseNormal.x*positionOffset.x + baseNormal.y*positionOffset.y)*_Offset;
+
+                float neighborDepth = baseDepth + baseNormal.x*positionOffset.x + baseNormal.y*positionOffset.x;
                 
                 
                 neighbor.depth = neighborDepth;
 
                 return neighbor;
                 // float depth = baseDepth + 
+            }
+
+            float getDepth (float2 uv, float2 offset){
+                float4 depthNormal = tex2D(_CameraDepthNormalsTexture, 
+                        uv + _CameraDepthNormalsTexture_TexelSize.xy * offset);
+                float3 normal;
+                float depth;
+                DecodeDepthNormal(depthNormal, depth, normal);
+                return depth = depth * _ProjectionParams.z;
+            }
+
+            float2 sobel (float2 uv){
+                float up = getDepth(uv, float2(0.0, 1.0));  
+                float down = getDepth(uv, float2(0.0, -1.0));
+                float left = getDepth(uv, float2(1.0, 0.0));
+                float right = getDepth(uv, float2(-1.0, 0.0));
+                float centre = getDepth(uv, float2(0,0));
+
+                float depth = max(max(up, down), max(left, right));
+                return float2(clamp(up - centre, 0, 1) + clamp(down - centre, 0, 1) + clamp(left - centre, 0, 1) + clamp(right - centre, 0, 1), depth);
             }
 
             //the fragment shader
@@ -138,9 +167,10 @@ Shader "Postprocessing/depthShader"{
 
                 // depthDifference = 0.25*depthDifference;
 
-                depthDifference = clamp(depthDifference,-1,0);
+                // depthDifference = clamp(depthDifference,-1,0);
 
-                depthDifference = sqrt(depthDifference*depthDifference);
+                // depthDifference = sqrt(depthDifference*depthDifference);
+                // depthDifference = depthDifference*0.01;
 
                 // depthDifference = pow(depthDifference, 9);
                 // depthDifference = step(0.3, depthDifference);
@@ -157,7 +187,7 @@ Shader "Postprocessing/depthShader"{
                 fixed4 col = tex2D(_MainTex, i.uv);
                 // diff = pow(diff, 6);
                 // diff = diff*0.1;
-                depthDifference = clamp(depthDifference-0.1, 0, 1);
+                // depthDifference = clamp(depthDifference, 0, 1);
 
                 // depthDifference = pow(depthDifference,0.5);
 
@@ -166,12 +196,12 @@ Shader "Postprocessing/depthShader"{
 
                 // float4 scaledNormal = float4( float3( 1 - ( normal.xyz + 1 ) / 2 ), 1 );
 
-                float scaledNormal = normal.x;
+                // float scaledNormal = normal.x;
 
-                scaledNormal = sqrt(scaledNormal*scaledNormal);
+                // scaledNormal = sqrt(scaledNormal*scaledNormal);
 
 
-                col = lerp(col, float4(1,0,1,1), depthDifference);
+                // col = lerp(col, float4(1,0,1,1), depthDifference);
 
                 // col = pow(col, 2);
 
@@ -182,9 +212,20 @@ Shader "Postprocessing/depthShader"{
                 // float predictedDepth = predictedRight.depth + predictedUp.depth + predictedLeft.depth + predictedDown.depth;
 
                 // return float4(0,i.position.y*0.005,0,1);
-                // return float4(predictedLeft.depth*0.25*0.03,0,0,1);
+                // return float4(abs(predictedUp.depth)*0.25*0.03,0,0,1);
                 // return float4(scaledNormal,0,0,1);
+                // return col;
+
+                float2 sobelData = sobel(i.uv);
+                float s = pow(abs(1 - saturate(sobelData.x)), _Power);
+                s = floor(s+0.2);
+                s = lerp(1.0, s, ceil(sobelData.y - depth));
+                // float sobelDepth = lerp(sobelData.y, SampleDepth(input.uv), s);
+                col.rgb *= s;
+                col.a += 1 - s;
+
                 return col;
+
             }
 
             ENDCG
