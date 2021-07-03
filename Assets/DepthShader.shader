@@ -99,24 +99,6 @@ Shader "Postprocessing/depthShader"{
                 // float depth = baseDepth + 
             }
 
-            float Compare(float baseDepth, float baseNormal, float2 uv, float2 offset){
-                //read neighbor pixel
-                float4 neighborDepthnormal = tex2D(_CameraDepthNormalsTexture, 
-                        uv + _CameraDepthNormalsTexture_TexelSize.xy * offset);
-                float3 neighborNormal;
-                float neighborDepth;
-                // float predictedPixel = 
-                DecodeDepthNormal(neighborDepthnormal, neighborDepth, neighborNormal);
-                neighborDepth = neighborDepth * _ProjectionParams.z;
-
-                neighborNormal = mul((float3x3)_viewToWorld, neighborNormal);
-
-                float3 normalDifference = baseNormal-neighborNormal;
-                float depthDifference = baseDepth - neighborDepth;
-
-                return depthDifference;
-            }
-
             //the fragment shader
             fixed4 frag(v2f i) : SV_TARGET{
                 //read depthnormal
@@ -132,10 +114,21 @@ Shader "Postprocessing/depthShader"{
                 //get depth as distance from camera in units 
                 depth = depth * _ProjectionParams.z;
 
-                float depthDifference = Compare(depth, normal, i.uv, float2(1, 0));
-                depthDifference = depthDifference + Compare(depth, normal, i.uv, float2(0, 1));
-                depthDifference = depthDifference + Compare(depth, normal, i.uv, float2(0, -1));
-                depthDifference = depthDifference + Compare(depth, normal, i.uv, float2(-1, 0));
+                pixel up = GetNeighbor(i.uv, float2(0, 1));
+                pixel down = GetNeighbor(i.uv, float2(0, -1));
+                pixel left = GetNeighbor(i.uv, float2(-1, 0));
+                pixel right = GetNeighbor(i.uv, float2(1, 0));
+
+                pixel predictedUp = PredictNeighbor(depth, normal, i.position, float2(0, -1));
+                pixel predictedDown = PredictNeighbor(depth, normal, i.position, float2(0, 1));
+                pixel predictedLeft = PredictNeighbor(depth, normal, i.position, float2(-1, 0));
+                pixel predictedRight = PredictNeighbor(depth, normal, i.position, float2(1, 0));
+
+                float depthDifference = 
+                            predictedUp.depth - up.depth + 
+                            predictedDown.depth - down.depth + 
+                            predictedLeft.depth - left.depth + 
+                            predictedRight.depth - right.depth;
                             
 
                 // float depthDifference = 
@@ -143,7 +136,11 @@ Shader "Postprocessing/depthShader"{
 
                 // float depthDifference = depth - up.depth + depth - down.depth + depth - left.depth + depth - right.depth;
 
-                // depthDifference = sqrt(depthDifference*depthDifference);
+                // depthDifference = 0.25*depthDifference;
+
+                depthDifference = clamp(depthDifference,-1,0);
+
+                depthDifference = sqrt(depthDifference*depthDifference);
 
                 // depthDifference = pow(depthDifference, 9);
                 // depthDifference = step(0.3, depthDifference);
@@ -152,14 +149,15 @@ Shader "Postprocessing/depthShader"{
                 // depthDifference = pow(depthDifference,1);
                 // diff = step(0.9, diff);
 
-                depthDifference = clamp(depthDifference-0,0,1);
+                // depthDifference = clamp(depthDifference-0.2,0,1);
 
-                depthDifference = step(0.25, depthDifference);
+
+                // depthDifference = step(0.25, depthDifference);
 
                 fixed4 col = tex2D(_MainTex, i.uv);
                 // diff = pow(diff, 6);
                 // diff = diff*0.1;
-                depthDifference = clamp(depthDifference, 0, 1);
+                depthDifference = clamp(depthDifference-0.1, 0, 1);
 
                 // depthDifference = pow(depthDifference,0.5);
 
