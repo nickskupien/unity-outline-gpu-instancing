@@ -153,24 +153,35 @@ Shader "Postprocessing/depthShader"{
             }
 
             float innerEdgeDetect (pixel basePixel, pixel newPixel){
-                float baseNormal = basePixel.normal;
-                float newNormal = newPixel.normal;
+                float3 baseNormal = basePixel.normal;
+                float3 newNormal = newPixel.normal;
 
-                float result = 1-abs(dot(baseNormal, newNormal)/abs(baseNormal*newNormal));
+                float3 magBaseNormal = baseNormal-newNormal;
+                float result = magBaseNormal.x + magBaseNormal.y + magBaseNormal.z;
+
+                result = step(0.00001, result);
+                // result = clamp(result,0,1);
+                
+
+                
+
+                // float result = 1-dot(baseNormal,newNormal)/abs(baseNormal)*abs(newNormal);
                 // result = abs(result);
 
                 // float3 result = basePixel.normal - newPixel.normal;
-                // result = result.x + result .y + result.z;
+                // result = result.x + result.y + result.z;
                 // result = abs(result);
 
                 [branch] if(abs(basePixel.depth - newPixel.depth)>0.25){
                     result = 0;
                 }
 
+                // result = outerEdgeDetect(result);
+
                 // float result = 
                 // result = tanh(result);
                 // result = pow(result, 0.01);
-                // result = clamp(result, 0, 1-_Threshold5);
+                result = clamp(result, 0, 1-_Threshold5);
 
 
                 return result;
@@ -214,10 +225,10 @@ Shader "Postprocessing/depthShader"{
                             + outerEdgeDetect(right.depth - predictedRight.depth);
 
                 float innerEdge = 
-                            innerEdgeDetect(up, predictedUp);
-                            // + innerEdgeDetect(down, predictedDown)
-                            // + innerEdgeDetect(left, predictedLeft);
-                            // + innerEdgeDetect(right, predictedRight);
+                            innerEdgeDetect(up, predictedUp)
+                            + innerEdgeDetect(down, predictedDown)
+                            + innerEdgeDetect(left, predictedLeft)
+                            + innerEdgeDetect(right, predictedRight);
                             
                 // depthDifference = edgeDetect(up.depth - predictedUp.depth)+ edgeDetect(left.depth - predictedLeft.depth);
                 // float depthDifference = 
