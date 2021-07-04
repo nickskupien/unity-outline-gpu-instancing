@@ -81,7 +81,7 @@ Material:
     - _Threshold: 0
     - _Threshold2: 3
     - _Threshold3: 7
-    - _Threshold4: 0
+    - _Threshold4: 1
     - _Threshold5: 0
     - _UVSec: 0
     - _WaveDistance: 1.2
