@@ -5,10 +5,13 @@ Shader "Postprocessing/depthShader"{
         _MainTex ("Texture", 2D) = "white" {}
         _Offset ("Pixel Offset", Range (0,20)) = 0.001
         _Power ("Sobel Power", Range(0,20)) = 1
+        [Header(Outside Edge Detection)] [Space]
         _Threshold ("First Clamp", Range(0,2)) = 0.1
         _Threshold2 ("Slope of Tanh", Range(0,4)) = 1
         _Threshold3 ("Clamp of Tanh", Range(0,8)) = 2
         _Threshold4 ("Last Clamp", Range(0,1)) = 0.2
+        [Header(Inside Edge Detection)] [Space]
+        _Threshold5 ("First Clamp", Range(0,2)) = 0.1
     }
 
     SubShader{
@@ -47,6 +50,7 @@ Shader "Postprocessing/depthShader"{
             float _Threshold2;
             float _Threshold3;
             float _Threshold4;
+            float _Threshold5;
 
             //matrix to convert from view space to world space
             float4x4 _viewToWorld;
@@ -139,17 +143,37 @@ Shader "Postprocessing/depthShader"{
                 return float2(clamp(up - centre, 0, 1) + clamp(down - centre, 0, 1) + clamp(left - centre, 0, 1) + clamp(right - centre, 0, 1), depth);
             }
 
-            float OuterEdgeDetect (float depthDifference){
+            float outerEdgeDetect (float depthDifference){
                 float result = depthDifference;
                 result = clamp(result-_Threshold, 0, 1-_Threshold)*(1/(1-_Threshold));
-                result = 0.5 * (tanh(2*PI*result*_Threshold2 - _Threshold3) + 1);
+                result = (tanh(2*PI*result*_Threshold2 - _Threshold3) + 1);
                 // result = pow()
                 
                 return result;
             }
 
-            float innerEdgeDetect (float normalDifference){
-                float result = normalDifference;
+            float innerEdgeDetect (pixel basePixel, pixel newPixel){
+                float baseNormal = basePixel.normal;
+                float newNormal = newPixel.normal;
+
+                float result = 1-abs(dot(baseNormal, newNormal)/abs(baseNormal*newNormal));
+                // result = abs(result);
+
+                // float3 result = basePixel.normal - newPixel.normal;
+                // result = result.x + result .y + result.z;
+                // result = abs(result);
+
+                [branch] if(abs(basePixel.depth - newPixel.depth)>0.25){
+                    result = 0;
+                }
+
+                // float result = 
+                // result = tanh(result);
+                // result = pow(result, 0.01);
+                // result = clamp(result, 0, 1-_Threshold5);
+
+
+                return result;
             }
 
             //the fragment shader
@@ -183,17 +207,17 @@ Shader "Postprocessing/depthShader"{
                 //             left.depth - predictedLeft.depth + 
                 //             right.depth - predictedRight.depth;
                             
-                float OuterEdge = 
-                            OuterEdgeDetect(up.depth - predictedUp.depth)
-                            + OuterEdgeDetect(down.depth - predictedDown.depth)
-                            + OuterEdgeDetect(left.depth - predictedLeft.depth)
-                            + OuterEdgeDetect(right.depth - predictedRight.depth);
+                float outerEdge = 
+                            outerEdgeDetect(up.depth - predictedUp.depth)
+                            + outerEdgeDetect(down.depth - predictedDown.depth)
+                            + outerEdgeDetect(left.depth - predictedLeft.depth)
+                            + outerEdgeDetect(right.depth - predictedRight.depth);
 
-                float normalDifference = 
-                            OuterEdgeDetect(up.normal - predictedUp.normal)
-                            + OuterEdgeDetect(down.normal - predictedDown.normal)
-                            + OuterEdgeDetect(left.normal - predictedLeft.normal)
-                            + OuterEdgeDetect(right.normal - predictedRight.normal);
+                float innerEdge = 
+                            innerEdgeDetect(up, predictedUp);
+                            // + innerEdgeDetect(down, predictedDown)
+                            // + innerEdgeDetect(left, predictedLeft);
+                            // + innerEdgeDetect(right, predictedRight);
                             
                 // depthDifference = edgeDetect(up.depth - predictedUp.depth)+ edgeDetect(left.depth - predictedLeft.depth);
                 // float depthDifference = 
@@ -215,7 +239,7 @@ Shader "Postprocessing/depthShader"{
                 // depthDifference = pow(depthDifference,1);
                 // diff = step(0.9, diff);
 
-                OuterEdge = clamp(OuterEdge-_Threshold4,0,1-_Threshold4)*(1/(1-_Threshold4));
+                outerEdge = clamp(outerEdge-_Threshold4,0,1-_Threshold4)*(1/(1-_Threshold4));
 
 
                 // depthDifference = step(0.25, depthDifference);
@@ -237,7 +261,8 @@ Shader "Postprocessing/depthShader"{
                 // scaledNormal = sqrt(scaledNormal*scaledNormal);
 
 
-                col = lerp(col, float4(1,0,1,1), OuterEdge);
+                col = lerp(col, float4(1,0,1,1), outerEdge);
+                col = lerp(col, float4(0,1,0,1), innerEdge);
 
                 // col = pow(col, 2);
 
