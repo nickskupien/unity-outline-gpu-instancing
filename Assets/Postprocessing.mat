@@ -73,9 +73,16 @@ Material:
     - _Offset: 0
     - _Parallax: 0.02
     - _PixelDensity: 3.68
+    - _Power: 0
+    - _Prop1: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _Threshold: 0
+    - _Threshold2: 3
+    - _Threshold3: 7
+    - _Threshold4: 0
+    - _Threshold5: 0
     - _UVSec: 0
     - _WaveDistance: 1.2
     - _WaveTrail: 1.35

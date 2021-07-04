@@ -169,18 +169,18 @@ Shader "Postprocessing/depthShader"{
 
 
 
-                // float3 crossProduct = cross(baseNormal, newNormal);
-                // float magCrossProduct = length(crossProduct);
-                // float angleBetweenNormals = sign(crossProduct.y)*magCrossProduct/(magBaseNormal*magNewNormal);
-                // // result = -clamp(angleBetweenNormals,-1,0);
-                // result = crossProduct.y;
+                float3 crossProduct = cross(baseNormal, newNormal);
+                float magCrossProduct = length(crossProduct);
+                float angleBetweenNormals = sign(crossProduct.y)*magCrossProduct/(magBaseNormal*magNewNormal);
+                // result = -clamp(angleBetweenNormals,-1,0);
+                result = crossProduct.y;
                 // result = step(0.2,result);
                 
 
                 float3 diffNormal = baseNormal-newNormal;
                 result = diffNormal.x + diffNormal.y + diffNormal.z;
 
-                result = step(0.01, result);
+                result = step(0.00001, result);
                 // result = clamp(result,0,1);
 
                 
@@ -291,12 +291,9 @@ Shader "Postprocessing/depthShader"{
 
                 // scaledNormal = sqrt(scaledNormal*scaledNormal);
 
-                float4 innerEdgeColour = col + float4(0.1,0.05,0.05,1);
-                float4 outerEdgeColour = col - float4(0.2,0.2,0.1,1);
 
-
-                col = lerp(col, innerEdgeColour, innerEdge);
-                col = lerp(col, outerEdgeColour, outerEdge);
+                col = lerp(col, float4(1,0,1,1), outerEdge);
+                col = lerp(col, float4(0,1,0,1), innerEdge);
 
                 // col = pow(col, 2);
 
