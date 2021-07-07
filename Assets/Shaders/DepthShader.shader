@@ -276,6 +276,7 @@ Shader "Postprocessing/depthShader"{
                 // depthDifference = step(0.25, depthDifference);
 
                 outerEdge = step(_Threshold4,outerEdge);
+                innerEdge = step(0.1,innerEdge);
 
                 fixed4 col = tex2D(_MainTex, i.uv);
                 // diff = pow(diff, 6);
@@ -293,7 +294,7 @@ Shader "Postprocessing/depthShader"{
 
                 // scaledNormal = sqrt(scaledNormal*scaledNormal);
 
-                float4 innerEdgeColour = col + float4(0.1,0.05,0.05,1);
+                float4 innerEdgeColour = col + float4(0.2,0.2,0.2,1);
                 float4 outerEdgeColour = col - float4(0.25,0.3,0.2,1);
 
 
