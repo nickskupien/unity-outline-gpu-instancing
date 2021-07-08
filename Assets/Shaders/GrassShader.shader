@@ -23,6 +23,8 @@ Shader "Custom/GrassShader" {
             "_BackgroundTexture"
         }
 
+        Blend SrcAlpha OneMinusSrcAlpha
+
         // Render the object with the texture generated above, and invert the colors
         Pass
         {
@@ -34,6 +36,8 @@ Shader "Custom/GrassShader" {
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            float4 _MainTex_ST;
+
 
             //the object data that's put into the vertex shader
             struct appdata{
@@ -45,7 +49,8 @@ Shader "Custom/GrassShader" {
             struct v2f{
                 float4 position : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                float4 grabPos : TEXCOORD1;
+                float4 vertex : TEXCOORD3;
+                float4 screenPos : TEXCOORD1;
                 float4 objPos : TEXCOORD2;
             };
 
@@ -59,18 +64,28 @@ Shader "Custom/GrassShader" {
             v2f vert(appdata v){
                 v2f o;
                 //convert the vertex positions from object space to clip space so they can be rendered
+                o.vertex = v.vertex;
                 o.position = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+
+                float4 positionBottomMiddle = UnityObjectToClipPos(float4(0.5,0,0,1));
 
                 // use ComputeGrabScreenPos function from UnityCG.cginc
                 // to get the correct texture coordinate
-                o.grabPos = ComputeGrabScreenPos(o.position);
-
-                // o.objPos = mul(unity_ObjectToWorld, v.vertex);
-                // o.objPos = mul(unity_ObjectToWorld, float4(0,0,0,1));
+                o.screenPos = ComputeScreenPos(positionBottomMiddle);
 
                 o.objPos = mul(unity_ObjectToWorld, v.vertex);
+                // o.objPos = mul(unity_ObjectToWorld, float4(0,0,0,1));
+
+                // o.objPos = v.vertex;
                 // o.objPos = mul(unity_WorldToObject, o.objPos);
+
+                // float3 worldPos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1)).xyz;
+                // float3 playerToVertexVec = worldPos - _PlayerPos.xyz;
+                // float3 playerToVertexDir = normalize(playerToVertexVec);
+                // float playerToVertexDist = length(playerToVertexVec);
+                // worldPos += playerToVertexDir * (1 - saturate(playerToVertexDist / _BendRange)) * _BendStrength;
+                // o.objPos = float4(worldPos, 1);
 
                 return o;
                 
@@ -82,7 +97,16 @@ Shader "Custom/GrassShader" {
             {
 
                 // half4 bgcolor = tex2Dproj(_BackgroundTexture, float4(i.grabPos.x,i.grabPos.y,i.grabPos.z,i.grabPos.a));
-                float4 bgcolor = tex2D(_BackgroundTexture, i.objPos);
+                // Linear01
+                float2 uv = i.screenPos.xy / i.screenPos.w;
+                // uv = trunc(uv);
+
+                float4 bgcolor = tex2D(_BackgroundTexture, uv);
+                bgcolor.a = bgcolor.a * tex2D(_MainTex, i.uv).a;
+                // return float4(uv,0,1);
+                // return i.vertex;
+                // return i.position*0.01;
+                // return float4()
                 return bgcolor;
                 
             }
