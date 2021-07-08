@@ -212,7 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dbce0055cf7743d796668e81c67960c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grassOffset: 0.5
+  grassOffset: 1
   grassPrefabsFolder: Prefabs/Grass
   grassObjects: []
 --- !u!1 &589582400
@@ -252,7 +252,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.21568629, g: 0.34901962, b: 0.3803922, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
