@@ -39,10 +39,12 @@ public class SpawnGrass : MonoBehaviour
         for (int y = 0; y < grassDensity; y++){
             for (int x = 0; x < grassDensity; x++){
                 float grassY = terrainHeight[y,x] + grassOffset;
-                float grassX = terrainOffset.x + distanceBetweenGrass.x*x;
-                float grassZ = terrainOffset.z + distanceBetweenGrass.z*y;
+                float grassX = terrainOffset.x + distanceBetweenGrass.x*x + Random.Range(0, distanceBetweenGrass.x);
+                float grassZ = terrainOffset.z + distanceBetweenGrass.z*y + Random.Range(0, distanceBetweenGrass.z);
 
-                Debug.Log("number of grass objects: " + grassObjects.Count);
+                // Debug.Log(y%2);
+
+                // Debug.Log("number of grass objects: " + grassObjects.Count);
 
                 int grassPrefabToUse = Random.Range(0, grassObjects.Count-1);
 
