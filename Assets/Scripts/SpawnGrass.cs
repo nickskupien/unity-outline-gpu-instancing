@@ -9,7 +9,8 @@ public class SpawnGrass : MonoBehaviour
     // Terrain activeTerrain;
 
     //Unity says this is the main terrain of the scene
-    public static Terrain activeTerrain;
+    [SerializeField]
+    public Terrain activeTerrain;
     public float grassOffset;
     public float grassDensityPerTerrainScale = 1.5f;
 
@@ -25,7 +26,7 @@ public class SpawnGrass : MonoBehaviour
             grassObjects.Add(grassObject as GameObject);
         }
 
-        activeTerrain = transform.gameObject.GetComponent<Terrain>();
+        // activeTerrain = transform.gameObject.GetComponent<Terrain>();
         var terrainData = activeTerrain.terrainData;
 
         var terrainScale = terrainData.heightmapScale.y;
@@ -49,7 +50,7 @@ public class SpawnGrass : MonoBehaviour
 
                 int grassPrefabToUse = Random.Range(0, grassObjects.Count-1);
 
-                Instantiate(grassObjects[grassPrefabToUse], new Vector3(grassX,grassY,grassZ), Quaternion.identity);
+                Instantiate(grassObjects[grassPrefabToUse], new Vector3(grassX,grassY,grassZ), Quaternion.identity, transform);
             }
         }       
     }
