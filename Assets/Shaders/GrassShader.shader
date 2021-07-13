@@ -1,3 +1,5 @@
+// Upgrade NOTE: upgraded instancing buffer 'MyProperties' to new syntax.
+
 Shader "Custom/GrassShader" {
     Properties{
         _MainTex ("Texture", 2D) = "white" {}
@@ -31,6 +33,7 @@ Shader "Custom/GrassShader" {
             #include "UnityCG.cginc"
 
             sampler2D _MainTex;
+            
             //This comes from GrabPass shader and material to get this once
             sampler2D _TerrainGrab;
             sampler2D _BackgroundTexture;
@@ -50,9 +53,15 @@ Shader "Custom/GrassShader" {
                 float2 uv : TEXCOORD0;
                 float4 vertex : TEXCOORD3;
                 float4 screenPos : TEXCOORD1;
-                float4 objPos : TEXCOORD2;
+                // float4 objPos : TEXCOORD2;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
+
+//             UNITY_INSTANCING_BUFFER_START (MyProperties)
+//             UNITY_DEFINE_INSTANCED_PROP (sampler2D, _MainTex)
+// #define _MainTex_arr MyProperties
+//             UNITY_INSTANCING_BUFFER_END(MyProperties)
+
 
             //using this to hold pixel data
             struct pixel{
@@ -84,8 +93,8 @@ Shader "Custom/GrassShader" {
                 // o.objPos = mul(unity_ObjectToWorld, v.vertex);
                 // o.objPos = mul(unity_ObjectToWorld, float4(0,0,0,1));
 
-                o.objPos = v.vertex;
-                o.objPos = mul(unity_WorldToObject, o.objPos);
+                // o.objPos = v.vertex;
+                // o.objPos = mul(unity_WorldToObject, o.objPos);
 
                 // float3 worldPos = mul(unity_ObjectToWorld, float4(v.vertex.xyz, 1)).xyz;
                 // float3 playerToVertexVec = worldPos - _PlayerPos.xyz;
@@ -106,7 +115,7 @@ Shader "Custom/GrassShader" {
                 // half4 bgcolor = tex2Dproj(_TerrainGrab, float4(i.grabPos.x,i.grabPos.y,i.grabPos.z,i.grabPos.a));
                 // Linear01
                 float2 uv = i.screenPos.xy / i.screenPos.w;
-                // uv = trunc(uv);
+                // sampler2D texture = UNITY_ACCESS_INSTANCED_PROP(MyProperties, _MainTex);
 
                 float4 bgcolor = tex2D(_TerrainGrab, uv);
                 // bgcolor = tex2D(_BackgroundTexture, uv);

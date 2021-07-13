@@ -49,6 +49,7 @@ public class SpawnGrass : MonoBehaviour
                 // Debug.Log("number of grass objects: " + grassObjects.Count);
 
                 int grassPrefabToUse = Random.Range(0, grassObjects.Count-1);
+                grassPrefabToUse = 0;
 
                 Instantiate(grassObjects[grassPrefabToUse], new Vector3(grassX,grassY,grassZ), Quaternion.identity, transform);
             }
