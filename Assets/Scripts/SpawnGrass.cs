@@ -24,7 +24,7 @@ public class SpawnGrass : MonoBehaviour
             grassObjects.Add(grassObject as GameObject);
         }
 
-        var grassDensity = 128;
+        var grassDensity = 100;
         activeTerrain = transform.gameObject.GetComponent<Terrain>();
         var terrainData = activeTerrain.terrainData;
 
