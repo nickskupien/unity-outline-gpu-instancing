@@ -10,6 +10,7 @@ public class CameraMovement : MonoBehaviour
     [Range(0f, 10f)]
     public float panSpeed = 3;
 
+    public float pitch = 30;
     private Vector2 orbitAngles = new Vector2(30,45f);
     private Vector3 focusPoint = new Vector3(0,10,0);
 
@@ -25,6 +26,7 @@ public class CameraMovement : MonoBehaviour
     void LateUpdate()
     {
         orbitAngles.y += Input.GetAxis("Mouse X") * rotationSpeed * Time.unscaledDeltaTime * Input.GetAxis("Fire1");
+        orbitAngles.x = pitch;
         posY += Input.GetAxis("Vertical") * panSpeed * Time.unscaledDeltaTime;
         Quaternion lookRotation = Quaternion.Euler(orbitAngles);
         Vector3 lookDirection = lookRotation * Vector3.forward;
