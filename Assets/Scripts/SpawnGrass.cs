@@ -11,6 +11,7 @@ public class SpawnGrass : MonoBehaviour
     //Unity says this is the main terrain of the scene
     public static Terrain activeTerrain;
     public float grassOffset;
+    public float grassDensityPerTerrainScale = 1.5f;
 
     public string grassPrefabsFolder;
     public List<GameObject> grassObjects = new List<GameObject>();
@@ -24,12 +25,12 @@ public class SpawnGrass : MonoBehaviour
             grassObjects.Add(grassObject as GameObject);
         }
 
-        var grassDensity = 100;
         activeTerrain = transform.gameObject.GetComponent<Terrain>();
         var terrainData = activeTerrain.terrainData;
 
         var terrainScale = terrainData.heightmapScale.y;
         var terrainSize = terrainData.size;
+        int grassDensity = Mathf.FloorToInt(terrainSize.x*grassDensityPerTerrainScale);
         var terrainOffset = activeTerrain.transform.position;
         // var terrainResolution = terrainData.heightmapResolution;
         float interpolatedDistance = 1.0f/grassDensity;

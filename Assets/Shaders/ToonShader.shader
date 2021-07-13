@@ -59,7 +59,7 @@ Shader "Custom/ToonShader"{
             // (that's fine because we used floor previously and we want everything to be the value above the floor value, 
             // for example 0 to 1 should be 1, 1 to 2 should be 2 etc...)
             float change = fwidth(towardsLight);
-            float smoothing = smoothstep(0, change, frac(towardsLight));
+            float smoothing = step(0, frac(towardsLight));
             lightIntensity = lightIntensity + smoothing;
 
             // bring the light intensity back into a range where we can use it for color
@@ -70,11 +70,11 @@ Shader "Custom/ToonShader"{
         #ifdef USING_DIRECTIONAL_LIGHT
             //for directional lights, get a hard vut in the middle of the shadow attenuation
             float attenuationChange = fwidth(shadowAttenuation) * 0.5;
-            float shadow = smoothstep(0.5 - attenuationChange, 0.5 + attenuationChange, shadowAttenuation);
+            float shadow = step(0.5 - attenuationChange, shadowAttenuation);
         #else
             //for other light types (point, spot), put the cutoff near black, so the falloff doesn't affect the range
             float attenuationChange = fwidth(shadowAttenuation);
-            float shadow = smoothstep(0, attenuationChange, shadowAttenuation);
+            float shadow = step(0, shadowAttenuation);
         #endif
             lightIntensity = lightIntensity * shadow;
 
@@ -89,7 +89,7 @@ Shader "Custom/ToonShader"{
 
             //make specular intensity with a hard corner
             float specularChange = fwidth(towardsReflection);
-            float specularIntensity = smoothstep(1 - _SpecularSize, 1 - _SpecularSize + specularChange, towardsReflection);
+            float specularIntensity = step(1 - _SpecularSize, towardsReflection);
             //factor inshadows
             specularIntensity = specularIntensity * shadow;
 

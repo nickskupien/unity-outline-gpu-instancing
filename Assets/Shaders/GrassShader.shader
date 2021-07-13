@@ -73,7 +73,7 @@ Shader "Custom/GrassShader" {
                 // o.uv = v.uv;
 
                 // o.position = UnityObjectToClipPos(v.vertex);
-                float4 positionBottomMiddle = UnityObjectToClipPos(float4(v.vertex.x - v.vertex.x%.8,v.vertex.y - v.vertex.y%.8,v.vertex.z - v.vertex.z%.8,1));
+                float4 positionBottomMiddle = UnityObjectToClipPos(float4(0,-0.5,0,1));
                 // positionBottomMiddle = UnityObjectToClipPos(v.vertex);
 
                 // use ComputeGrabScreenPos function from UnityCG.cginc
@@ -112,7 +112,7 @@ Shader "Custom/GrassShader" {
                 // bgcolor = tex2D(_BackgroundTexture, uv);
                 bgcolor.a = bgcolor.a * tex2D(_MainTex, i.uv).a;
                 // return float4(uv,0,1);
-                // return float4(i.vertex.xyz - i.vertex.xyz % 0.1,1);
+                // return float4(i.vertex.xyz,1);
                 // return float4(i.position.rgb*0.01,1);
                 // return i.screenPos;
                 // return float4()
