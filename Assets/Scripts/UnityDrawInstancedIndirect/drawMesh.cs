@@ -9,12 +9,15 @@ public class drawMesh : MonoBehaviour {
     public Material material;
     public ComputeShader compute;
     public Transform pusher;
+    public Camera cam;
+    public Matrix4x4 rotationTransformation;
 
     private ComputeBuffer meshPropertiesBuffer;
     private ComputeBuffer argsBuffer;
 
     private Mesh mesh;
     private Bounds bounds;
+    private Vector3[] positions;
 
     // Mesh Properties struct to be read from the GPU.
     // Size() is a convenience funciton which returns the stride of the struct.
@@ -55,9 +58,12 @@ public class drawMesh : MonoBehaviour {
 
         // Initialize buffer with the given population.
         MeshProperties[] properties = new MeshProperties[population];
+        positions = new Vector3[population];
+
         for (int i = 0; i < population; i++) {
             MeshProperties props = new MeshProperties();
             Vector3 position = new Vector3(Random.Range(-range, range), Random.Range(-range, range), Random.Range(-range, range));
+            positions[i] = position;
             Quaternion rotation = Quaternion.Euler(Random.Range(-180, 180), Random.Range(-180, 180), Random.Range(-180, 180));
             Vector3 scale = Vector3.one;
 
@@ -122,7 +128,14 @@ public class drawMesh : MonoBehaviour {
     private void Update() {
         int kernel = compute.FindKernel("CSMain");
 
-        compute.SetVector("_PusherPosition", pusher.position);
+        Vector3 position = positions[0];
+
+        rotationTransformation = Matrix4x4.LookAt(position, cam.transform.position, Vector3.up);
+
+        rotationTransformation = Matrix4x4.Rotate(rotationTransformation.rotation);
+
+        compute.SetMatrix("_PusherRotation", rotationTransformation);
+        compute.SetInt("_Resolution", population);
         // We used to just be able to use `population` here, but it looks like a Unity update imposed a thread limit (65535) on my device.
         // This is probably for the best, but we have to do some more calculation.  Divide population by numthreads.x in the compute shader.
         compute.Dispatch(kernel, Mathf.CeilToInt(population / 64f), 1, 1);

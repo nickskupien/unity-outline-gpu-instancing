@@ -229,6 +229,8 @@ GameObject:
   - component: {fileID: 1425544563}
   - component: {fileID: 1425544562}
   - component: {fileID: 1425544561}
+  - component: {fileID: 1425544564}
+  - component: {fileID: 1425544565}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -270,8 +272,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 35
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 30
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -301,6 +303,44 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 45, y: 40, z: 0}
+--- !u!114 &1425544564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425544560}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c5c92fbea75b43089bca753e91f5b88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 50
+  automaticRotationSpeed: 10
+  panSpeed: 3
+  pitch: 30
+  distance: 500
+  posY: 35
+  alignSmoothRange: 45
+--- !u!114 &1425544565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425544560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c5c92fbea75b43089bca753e91f5b88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationSpeed: 100
+  automaticRotationSpeed: 100
+  panSpeed: 3
+  pitch: 30
+  distance: 500
+  posY: 35
+  alignSmoothRange: 45
 --- !u!1 &1945739036
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,10 +371,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   population: 100000
-  range: 10
+  range: 20
   material: {fileID: 2100000, guid: afd3feacea7664ce8b80a23675896be7, type: 2}
   compute: {fileID: 7200000, guid: 1bbf26441ed9b408bbaba5d59e1c0327, type: 3}
   pusher: {fileID: 93347948}
+  cam: {fileID: 1425544562}
+  rotationTransformation:
+    e00: 0
+    e01: 0
+    e02: 0
+    e03: 0
+    e10: 0
+    e11: 0
+    e12: 0
+    e13: 0
+    e20: 0
+    e21: 0
+    e22: 0
+    e23: 0
+    e30: 0
+    e31: 0
+    e32: 0
+    e33: 0
 --- !u!4 &1945739038
 Transform:
   m_ObjectHideFlags: 0

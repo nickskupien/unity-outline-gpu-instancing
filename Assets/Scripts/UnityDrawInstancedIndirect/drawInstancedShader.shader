@@ -2,6 +2,11 @@ Shader "Custom/InstancedIndirectColor" {
     SubShader {
         Tags { "RenderType" = "Opaque" }
 
+        Cull Front
+        ZWrite On
+        Blend SrcAlpha OneMinusSrcAlpha
+        Lighting Off
+
         Pass {
             CGPROGRAM
             #pragma vertex vert
