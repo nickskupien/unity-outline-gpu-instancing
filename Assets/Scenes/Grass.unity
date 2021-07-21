@@ -155,6 +155,8 @@ MonoBehaviour:
   population: 100000
   range: 20
   grassOffset: 1
+  grassWidthScale: 1
+  grassHeightScale: 1
   activeTerrain: {fileID: 329024323}
   material: {fileID: 2100000, guid: afd3feacea7664ce8b80a23675896be7, type: 2}
   compute: {fileID: 7200000, guid: 1bbf26441ed9b408bbaba5d59e1c0327, type: 3}

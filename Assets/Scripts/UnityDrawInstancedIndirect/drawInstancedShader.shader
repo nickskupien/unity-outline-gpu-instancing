@@ -1,13 +1,15 @@
 Shader "Custom/InstancedIndirectColor" {
     Properties{
         _MainTex ("Texture", 2D) = "white" {}
+        _Cutoff("Alpha Cutoff", Range(0, 1)) = 0.5
     }
     
     SubShader {
-        Tags { "RenderType" = "Opaque" }
+        Tags { "Queue" = "Transparent" "RenderType" = "Transparent" }
 
-        Cull Back
+        // Cull Back
         ZWrite On
+        // ZTest LEqual
         Blend SrcAlpha OneMinusSrcAlpha
         Lighting Off
 
@@ -31,13 +33,15 @@ Shader "Custom/InstancedIndirectColor" {
 
             struct v2f {
                 float4 vertex   : SV_POSITION;
-                fixed4 color    : COLOR;
-                float2 uv : TEXCOORD0;
-                float4 screenPos : TEXCOORD1;
+                fixed4 color    : COLOR; 
+                float textureid : TEXCOORD0;
+                float2 uv : TEXCOORD1;
+                float4 screenPos : TEXCOORD2;
             }; 
 
             struct MeshProperties {
                 float4x4 mat;
+                float textureid; 
                 float4 color;
             };
 
@@ -49,8 +53,9 @@ Shader "Custom/InstancedIndirectColor" {
                 float4x4 mat = _Properties[instanceID].mat;
 
                 float4 pos = mul(mat, i.vertex);
-                o.vertex = UnityObjectToClipPos(pos);
+                o.vertex = UnityObjectToClipPos(pos); 
                 o.color = _Properties[instanceID].color;
+                o.textureid = _Properties[instanceID].textureid;
 
                 o.uv = TRANSFORM_TEX(i.uv, _MainTex);
                 
@@ -63,10 +68,34 @@ Shader "Custom/InstancedIndirectColor" {
                 return o;
             }
 
+            float2 getTextureUnpacked(float2 uv, float i){
+                float2 index = float2(floor(i/2), floor(i/4));
+                float2 uvOutput = uv;
+                float2 texturePacking = float2(0.25, 0.5);
+                float2 bounds = float2(0.01,0.01);
+                float2 offset = index * texturePacking;
+                uvOutput = uvOutput * texturePacking;
+                uvOutput = uvOutput + offset;
+                uvOutput = clamp(uvOutput, offset + bounds, offset + texturePacking - bounds);
+                // uvOutput = uv;
+                return uvOutput;
+            }
+
+            float _Cutoff;
+
             fixed4 frag(v2f i) : SV_Target {
+ 
+                float2 uvTexture = getTextureUnpacked(i.uv, i.textureid);
+
                 float2 uv = i.screenPos.xy / i.screenPos.w;
                 float4 bgcolor = tex2D(_TerrainGrab, uv);
-                bgcolor.a = bgcolor.a * tex2D(_MainTex, i.uv).a;
+                // bgcolor = float4(i.textureid/8,1,0,1);
+
+                float textureAlpha = bgcolor.a * tex2D(_MainTex, uvTexture).a;
+
+                clip(textureAlpha - _Cutoff);
+ 
+                bgcolor.a = textureAlpha;
 
                 return bgcolor;
                 // return i.color;

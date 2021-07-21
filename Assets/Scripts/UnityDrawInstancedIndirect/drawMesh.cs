@@ -8,6 +8,8 @@ public class drawMesh : MonoBehaviour {
     public int population;
     public float range;
     public float grassOffset = 1;
+    public float grassWidthScale = 0.5f;
+    public float grassHeightScale = 0.5f;
 
     [SerializeField]
     public Terrain activeTerrain;
@@ -25,16 +27,23 @@ public class drawMesh : MonoBehaviour {
     private Bounds bounds;
     private Vector3[] positions;
 
+    public struct IntVector2
+    {
+        public int x;
+        public int y;
+    }
+
     // Mesh Properties struct to be read from the GPU.
     // Size() is a convenience funciton which returns the stride of the struct.
     private struct MeshProperties {
         public Matrix4x4 mat;
+        public float textureid;
         public Vector4 color;
-        public int textureType;
 
         public static int Size() {
             return
                 sizeof(float) * 4 * 4 + // matrix;
+                sizeof(float) +       // texture type;
                 sizeof(float) * 4;      // color;
         }
     }
@@ -85,8 +94,8 @@ public class drawMesh : MonoBehaviour {
             Vector3 scale = Vector3.one;
 
             props.mat = Matrix4x4.TRS(position, rotation, scale);
-            props.color = Color.Lerp(Color.red, Color.blue, Random.value);
-            props.textureType = ReadOnlyCollectionBase.
+            // props.color = Color.Lerp(Color.red, Color.blue, Random.value);
+            props.textureid = Random.Range(0,7);
 
             properties[i] = props;
         }
@@ -101,8 +110,8 @@ public class drawMesh : MonoBehaviour {
         // Create a quad mesh.
         var mesh = new Mesh();
 
-        float w = width * .5f;
-        float h = height * .5f;
+        float w = width * grassWidthScale;
+        float h = height * grassHeightScale;
         var vertices = new Vector3[4] {
             new Vector3(-w, -h, 0),
             new Vector3(w, -h, 0),
