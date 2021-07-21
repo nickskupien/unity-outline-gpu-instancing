@@ -2,9 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Starter code from: https://toqoz.fyi/thousands-of-meshes.html
+
 public class drawMesh : MonoBehaviour {
     public int population;
     public float range;
+    public float grassOffset = 1;
+
+    [SerializeField]
+    public Terrain activeTerrain;
 
     public Material material;
     public ComputeShader compute;
@@ -24,6 +30,7 @@ public class drawMesh : MonoBehaviour {
     private struct MeshProperties {
         public Matrix4x4 mat;
         public Vector4 color;
+        public int textureType;
 
         public static int Size() {
             return
@@ -60,15 +67,26 @@ public class drawMesh : MonoBehaviour {
         MeshProperties[] properties = new MeshProperties[population];
         positions = new Vector3[population];
 
+        var terrainData = activeTerrain.terrainData;
+        var terrainSize = terrainData.size;
+        var terrainOffset = activeTerrain.transform.position;
+
         for (int i = 0; i < population; i++) {
             MeshProperties props = new MeshProperties();
-            Vector3 position = new Vector3(Random.Range(-range, range), Random.Range(-range, range), Random.Range(-range, range));
+
+            float grassX = Random.Range(terrainOffset.x, terrainOffset.x+terrainSize.x);
+            float grassZ = Random.Range(terrainOffset.z, terrainOffset.z+terrainSize.z);
+
+            float grassY = activeTerrain.SampleHeight(new Vector3(grassX, 0, grassZ)) + grassOffset;
+
+            Vector3 position = new Vector3(grassX, grassY, grassZ);
             positions[i] = position;
             Quaternion rotation = Quaternion.Euler(Random.Range(-180, 180), Random.Range(-180, 180), Random.Range(-180, 180));
             Vector3 scale = Vector3.one;
 
             props.mat = Matrix4x4.TRS(position, rotation, scale);
             props.color = Color.Lerp(Color.red, Color.blue, Random.value);
+            props.textureType = ReadOnlyCollectionBase.
 
             properties[i] = props;
         }
@@ -121,7 +139,7 @@ public class drawMesh : MonoBehaviour {
         return mesh;
     }
 
-    private void Start() {
+    private void OnEnable() {
         Setup();
     }
 
@@ -132,7 +150,9 @@ public class drawMesh : MonoBehaviour {
 
         rotationTransformation = Matrix4x4.LookAt(position, cam.transform.position, Vector3.up);
 
-        rotationTransformation = Matrix4x4.Rotate(rotationTransformation.rotation);
+        // rotationTransformation = Matrix4x4.Rotate(rotationTransformation.rotation);
+
+        rotationTransformation = Matrix4x4.Rotate(cam.transform.rotation);
 
         compute.SetMatrix("_PusherRotation", rotationTransformation);
         compute.SetInt("_Resolution", population);
