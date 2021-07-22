@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16b90e5ab514a438d9eba8c35fea671f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  population: 100000
+  population: 50000
   range: 20
   grassOffset: 1
   grassWidthScale: 1
