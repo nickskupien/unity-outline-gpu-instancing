@@ -4,12 +4,19 @@ using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
-    [Range(0f, 100f)]
+    [Range(0f, 500f)]
     public float rotationSpeed = 50;
     public float automaticRotationSpeed = 10;
+    public float deltaAbs;
 
     [Range(0f, 10f)]
     public float panSpeed = 3;
+
+    [Range(0f, 2f)]
+    public float slowSpeed = 3;
+
+    [Range(1f, 5)]
+    public float slowSpeedScale = 3;
 
     public float pitch = 30;
     private Vector2 orbitAngles = new Vector2(30,45f);
@@ -46,14 +53,12 @@ public class CameraMovement : MonoBehaviour
 
         targetAngle = Mathf.RoundToInt(targetAngle/45)*45;
 
-        float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, targetAngle));
+        deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, targetAngle));
         float rotationChange = automaticRotationSpeed * Time.unscaledDeltaTime;
 
-        if (deltaAbs < alignSmoothRange) {
-			rotationChange *= deltaAbs / alignSmoothRange;
-		}
+	    rotationChange *= slowSpeedScale * (Mathf.Atan(deltaAbs*slowSpeed));
 
-        if (deltaAbs < 10){
+        if (deltaAbs < 20){
             rotating = false;
         }
 
@@ -62,6 +67,9 @@ public class CameraMovement : MonoBehaviour
         }
         else{
             orbitAngles.y = Mathf.MoveTowardsAngle(orbitAngles.y, targetAngle, rotationChange);
+            if (deltaAbs < 0.01){
+                orbitAngles.y = targetAngle;    
+            }
         }
         
         orbitAngles.x = pitch;

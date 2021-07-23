@@ -60,7 +60,8 @@ Material:
     - _Cutoff: 0.016
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FlickerOffset: 1
+    - _FlickerOffset: 0.33
+    - _FlickerThreshold: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1

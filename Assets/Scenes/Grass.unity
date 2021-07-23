@@ -526,13 +526,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c5c92fbea75b43089bca753e91f5b88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationSpeed: 100
+  rotationSpeed: 400
   automaticRotationSpeed: 100
+  deltaAbs: 0
   panSpeed: 3
+  slowSpeed: 0.1
+  slowSpeedScale: 1
   pitch: 30
   distance: 40
   posY: 35
-  alignSmoothRange: 30
+  alignSmoothRange: 45
 --- !u!1 &760264398
 GameObject:
   m_ObjectHideFlags: 0

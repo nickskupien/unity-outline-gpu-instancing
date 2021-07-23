@@ -3,6 +3,7 @@ Shader "Custom/InstancedIndirectColor" {
         _MainTex ("Texture", 2D) = "white" {}
         _Cutoff("Alpha Cutoff", Range(0, 1)) = 0.5
         _FlickerOffset("Offset for adjusting flicker", Range(0,5)) = 0.01
+        _FlickerThreshold("Offset for adjusting flicker", Range(0,5)) = 0.01
         _GrassRandomness("Adjusting random colour variations", Range(0,1)) = 0.5
     }
     
@@ -50,6 +51,7 @@ Shader "Custom/InstancedIndirectColor" {
 
             StructuredBuffer<MeshProperties> _Properties;
             float _FlickerOffset;
+            float _FlickerThreshold;
 
             float4 getGrassColour(float3 position){
                 float4 middlePos = UnityObjectToClipPos(float3(position.x,position.y-1,position.z));
@@ -85,14 +87,21 @@ Shader "Custom/InstancedIndirectColor" {
                 float4 minimum = min(min(min(min(left, right), min(up, down)), min(min(diag1, diag2), min(diag3, diag4))), middle);
                 float4 maximum = max(max(max(max(left, right), max(up, down)), max(max(diag1, diag2), max(diag3, diag4))), middle);
 
+                // float4 minimum = min(min(min(left, right), min(up, down)), middle);
+                // float4 maximum = max(max(max(left, right), max(up, down)), middle);
+
                 float4 average = (middle + left + right + up + down + diag1 + diag2 + diag3 + diag4)/9;
+                // float4 average = (middle + left + right + up + down) * 0.2;
 
                 float4 minimumDifference = average - minimum;
                 float4 maximumDifference = maximum - average; 
 
                 float4 mode = (minimumDifference <= maximumDifference) ? minimum : maximum;
 
-                return mode;
+                mode = (length(minimumDifference - maximumDifference) < _FlickerThreshold) ? left : middle;
+
+                return average;
+                // return float4(length(minimumDifference - maximumDifference), 0, 0, 1);
             }
 
             v2f vert(appdata_t i, uint instanceID: SV_InstanceID) {
