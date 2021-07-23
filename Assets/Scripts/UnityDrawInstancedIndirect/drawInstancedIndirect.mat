@@ -60,12 +60,12 @@ Material:
     - _Cutoff: 0.016
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FlickerOffset: 0.33
+    - _FlickerOffset: 0.37
     - _FlickerThreshold: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _GrassRandomness: 0
+    - _GrassRandomness: 0.008
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
