@@ -5,7 +5,7 @@ however this expanded into gpu instanced pixel art grass on toon shaded terrain.
 
 more will be updated in the future to create a pixel art render pipeline!
 
-#Demos of this project
+## Demos of this project
 
 Rendering 100,000 blades of blades of grass (for fun) all using custom shaders: to process the grass quickly in batches, and to add pixel art rendering techniques (toon shader, outline shader, pixelized effect (applied to grass individually), shader to rotate the 2D grass so it faces the camera)
 
