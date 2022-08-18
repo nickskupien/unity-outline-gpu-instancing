@@ -1,4 +1,4 @@
-Shader "Custom/GrabPassTrick"
+Shader "Custom/GrabPass"
 {
     Properties
     {}

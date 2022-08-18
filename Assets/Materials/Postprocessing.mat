@@ -8,12 +8,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Postprocessing
-  m_Shader: {fileID: 4800000, guid: fa9e40ed744e74f8d80d9398d97f20e5, type: 3}
+  m_Shader: {fileID: 4800000, guid: ec874f6a36a0e48528df1b50b857eac7, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
@@ -70,19 +70,20 @@ Material:
     - _NormalBias: 2.91
     - _NormalMult: 2.32
     - _OcclusionStrength: 1
-    - _Offset: 0
+    - _Offset: 0.587
     - _Parallax: 0.02
     - _PixelDensity: 3.68
     - _Power: 0
     - _Prop1: 0
     - _SmoothnessTextureChannel: 0
+    - _SobelFloor: 0.569
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Threshold: 0.4
-    - _Threshold2: 0.98
-    - _Threshold3: 6.12
-    - _Threshold4: 0.317
-    - _Threshold5: 0.55
+    - _Threshold: 0.096
+    - _Threshold2: 0.01
+    - _Threshold3: 5.07
+    - _Threshold4: 0.259
+    - _Threshold5: 0.286
     - _UVSec: 0
     - _WaveDistance: 1.2
     - _WaveTrail: 1.35
@@ -91,6 +92,7 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FogColour: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _WaveColor: {r: 0.5660378, g: 0.008009953, b: 0.008009953, a: 1}
     - _topColor: {r: 1, g: 1, b: 1, a: 1}

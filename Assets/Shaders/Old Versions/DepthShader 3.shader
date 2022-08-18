@@ -1,4 +1,4 @@
-Shader "Postprocessing/depthShader"{
+Shader "Postprocessing/depthShader3"{
     //show values to edit in inspector
     
     Properties{

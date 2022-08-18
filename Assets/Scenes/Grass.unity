@@ -467,11 +467,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: -10
-  far clip plane: 100
+  near clip plane: 0.01
+  far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 20
+  orthographic size: 25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -508,7 +508,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 589582400}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 312e2f8110d384d8a82cf78647f25d9b, type: 3}
   m_Name: 
@@ -533,7 +533,7 @@ MonoBehaviour:
   slowSpeed: 0.1
   slowSpeedScale: 1
   pitch: 30
-  distance: 40
+  distance: 55
   posY: 35
   alignSmoothRange: 45
 --- !u!1 &760264398
@@ -939,7 +939,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4258610050989557489
 Transform:
   m_ObjectHideFlags: 0

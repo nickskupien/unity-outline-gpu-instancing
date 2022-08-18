@@ -1,4 +1,4 @@
-Shader "Postprocessing/depthShader"{
+Shader "Postprocessing/depthShader1"{
     //show values to edit in inspector
     Properties{
         _MainTex ("Texture", 2D) = "white" {}

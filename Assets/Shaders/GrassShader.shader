@@ -8,7 +8,7 @@ Shader "Custom/GrassShader" {
     SubShader
     {
         // Draw after all opaque geometry
-        Tags { "Queue" = "Transparent" }
+        // Tags { "Queue" = "Transparent" }
 
         // Grab the screen behind the object into _BackgroundTexture
         // GrabPass
